@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fiches espèces BTS GPN</title>
+    <!-- Inclusion du SDK CDN Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary-color: #2e7d32;
@@ -359,8 +361,7 @@
             </div>
         </div>
 
-        <!-- PAGES 4 À 13 (Générées / Structurées dynamiquement) -->
-        <!-- Page 4 -->
+        <!-- PAGES 4 À 13 -->
         <div id="page4" class="page" data-cat="mammiferes">
             <h2>Fiches espèces mammifères</h2>
             <button onclick="createNewFiche('mammiferes')" class="btn">+ Nouvelle fiche</button>
@@ -370,7 +371,6 @@
             </div>
         </div>
 
-        <!-- Page 5 -->
         <div id="page5" class="page" data-cat="oiseaux">
             <h2>Fiches espèces oiseaux</h2>
             <button onclick="createNewFiche('oiseaux')" class="btn">+ Nouvelle fiche</button>
@@ -380,7 +380,6 @@
             </div>
         </div>
 
-        <!-- Page 6 -->
         <div id="page6" class="page" data-cat="insectes">
             <h2>Fiches espèces insectes</h2>
             <button onclick="createNewFiche('insectes')" class="btn">+ Nouvelle fiche</button>
@@ -390,7 +389,6 @@
             </div>
         </div>
 
-        <!-- Page 7 -->
         <div id="page7" class="page" data-cat="squamates">
             <h2>Fiches espèces squamates</h2>
             <button onclick="createNewFiche('squamates')" class="btn">+ Nouvelle fiche</button>
@@ -400,7 +398,6 @@
             </div>
         </div>
 
-        <!-- Page 8 -->
         <div id="page8" class="page" data-cat="amphibiens">
             <h2>Fiches espèces amphibiens</h2>
             <button onclick="createNewFiche('amphibiens')" class="btn">+ Nouvelle fiche</button>
@@ -410,7 +407,6 @@
             </div>
         </div>
 
-        <!-- Page 9 -->
         <div id="page9" class="page" data-cat="forestier">
             <h2>Fiches espèces milieu forestier</h2>
             <button onclick="createNewFiche('forestier')" class="btn">+ Nouvelle fiche</button>
@@ -420,7 +416,6 @@
             </div>
         </div>
 
-        <!-- Page 10 -->
         <div id="page10" class="page" data-cat="montagnard">
             <h2>Fiches espèces milieu montagnard</h2>
             <button onclick="createNewFiche('montagnard')" class="btn">+ Nouvelle fiche</button>
@@ -430,7 +425,6 @@
             </div>
         </div>
 
-        <!-- Page 11 -->
         <div id="page11" class="page" data-cat="littoral">
             <h2>Fiches espèces milieu littoral</h2>
             <button onclick="createNewFiche('littoral')" class="btn">+ Nouvelle fiche</button>
@@ -440,7 +434,6 @@
             </div>
         </div>
 
-        <!-- Page 12 -->
         <div id="page12" class="page" data-cat="humide">
             <h2>Fiches espèces milieu humide</h2>
             <button onclick="createNewFiche('humide')" class="btn">+ Nouvelle fiche</button>
@@ -450,7 +443,6 @@
             </div>
         </div>
 
-        <!-- Page 13 -->
         <div id="page13" class="page" data-cat="agricole">
             <h2>Fiches espèces milieu ouvert/agricole</h2>
             <button onclick="createNewFiche('agricole')" class="btn">+ Nouvelle fiche</button>
@@ -486,7 +478,11 @@
                             <option value="insectes">Insectes</option>
                             <option value="squamates">Squamates</option>
                             <option value="amphibiens">Amphibiens</option>
-                            
+                            <option value="forestier">Milieu Forestier</option>
+                            <option value="montagnard">Milieu Montagnard</option>
+                            <option value="littoral">Milieu Littoral</option>
+                            <option value="humide">Milieu Humide</option>
+                            <option value="agricole">Milieu Ouvert/Agricole</option>
                         </select>
                     </div>
                 </div>
@@ -571,9 +567,7 @@
                     </div>
 
                     <div class="wheel-container">
-                        <svg class="wheel" viewBox="0 0 100 100" id="wheel-svg">
-                            <!-- Les secteurs SVG seront générés par JS -->
-                        </svg>
+                        <svg class="wheel" viewBox="0 0 100 100" id="wheel-svg"></svg>
                         <div class="wheel-center-text">Calendrier<br>Biologique</div>
                     </div>
                 </div>
@@ -606,78 +600,11 @@
     </main>
 
     <script>
-        // 1. Initialisation de Supabase
-const SUPABASE_URL = "https://mbrhsbouaktoxpzgkhyx.supabase.co/rest/v1/"; 
-const SUPABASE_ANON_KEY = "sb_publishable_AwJeI-Jb5SGifcFvixFgLw_D9ekQyZv";
+        // CONFIGURATION SUPABASE
+        const SUPABASE_URL = 'https://mbrhsbouaktoxpzgkhyx.supabase.co/rest/v1/';
+        const SUPABASE_ANON_KEY = 'sb_publishable_AwJeI-Jb5SGifcFvixFgLw_D9ekQyZv';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// 2. Gestion de la soumission du formulaire
-const form = document.getElementById('formFiche');
-const messageDiv = document.getElementById('message');
-
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  
-  const btn = document.getElementById('btnSubmit');
-  btn.disabled = true;
-  btn.textContent = "Envoi en cours...";
-  messageDiv.textContent = "";
-
-  try {
-    // --- A. TELEVERSER L'IMAGE DANS LE BUCKET ---
-    const fileInput = document.getElementById('photoInput');
-    const file = fileInput.files[0];
-
-    // Créer un nom de fichier unique pour éviter d'écraser des photos
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
-    const filePath = `especes/${fileName}`;
-
-    // Envoi de l'image dans le bucket 'photos-especes'
-    const { data: uploadData, error: uploadError } = await supabaseClient
-      .storage
-      .from('photos-especes')
-      .upload(filePath, file);
-
-    if (uploadError) throw uploadError;
-
-    // Récupérer l'URL publique de l'image téléversée
-    const { data: urlData } = supabaseClient
-      .storage
-      .from('photos-especes')
-      .getPublicUrl(filePath);
-
-    const publicImageUrl = urlData.publicUrl;
-
-    // --- B. ENREGISTRER LE TEXTE ET L'URL DANS LA BASE DE DONNÉES ---
-    const { error: insertError } = await supabaseClient
-      .from('fiches_especes')
-      .insert([
-        {
-          nom_commun: document.getElementById('nomCommun').value,
-          nom_scientifique: document.getElementById('nomScientifique').value,
-          famille: document.getElementById('famille').value,
-          description: document.getElementById('description').value,
-          image_url: publicImageUrl
-        }
-      ]);
-
-    if (insertError) throw insertError;
-
-    messageDiv.textContent = "✅ La fiche et la photo ont été enregistrées avec succès !";
-    messageDiv.style.color = "green";
-    form.reset();
-
-  } catch (error) {
-    console.error("Erreur :", error);
-    messageDiv.textContent = "❌ Erreur : " + error.message;
-    messageDiv.style.color = "red";
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "Enregistrer la fiche";
-  }
-});
         // Data Store
         let fichesData = [];
         let currentFicheId = null;
@@ -689,7 +616,6 @@ form.addEventListener('submit', async (e) => {
             migration: true
         };
 
-        // Modèle de périodes par défaut (1-12 pour les mois)
         let currentPeriodsData = {
             repro: { start: 3, end: 5 },
             naissance: { start: 5, end: 6 },
@@ -705,6 +631,33 @@ form.addEventListener('submit', async (e) => {
             migration: 'rgba(30, 136, 229, 0.6)'
         };
 
+        // Chargement initial depuis Supabase
+        async function fetchFichesFromSupabase() {
+            try {
+                const { data, error } = await supabase.from('fiches').select('*');
+                if (error) throw error;
+
+                if (data) {
+                    fichesData = data.map(item => ({
+                        id: item.id,
+                        nomCommun: item.nom_commun,
+                        nomScientifique: item.nom_scientifique,
+                        category: item.category,
+                        imgUrl: item.img_url,
+                        alimentation: item.alimentation,
+                        description: item.description,
+                        statuts: item.statuts,
+                        habitats: item.habitats || {},
+                        urls: item.urls || {},
+                        periods: item.periods || {}
+                    }));
+                    renderCatalogues();
+                }
+            } catch (err) {
+                console.error("Erreur lors de la récupération des fiches Supabase :", err.message);
+            }
+        }
+
         // Navigation
         function navTo(pageId, pushHistory = true) {
             if (pushHistory && historyStack[historyStack.length - 1] !== pageId) {
@@ -717,7 +670,6 @@ form.addEventListener('submit', async (e) => {
                 target.classList.add('active');
             }
 
-            // Gérer la visibilité des boutons
             document.getElementById('btn-home').style.display = (pageId === 'page1') ? 'none' : 'inline-block';
             document.getElementById('btn-back').style.display = (historyStack.length <= 1) ? 'none' : 'inline-block';
 
@@ -732,14 +684,12 @@ form.addEventListener('submit', async (e) => {
             }
         }
 
-        // Modèle / Fiche Logic
         function createNewFiche(category) {
             currentFicheId = 'fiche_' + Date.now();
             document.getElementById('fiche-form').reset();
             document.getElementById('field-main-category').value = category;
             document.getElementById('img-preview').style.display = 'none';
 
-            // Reset des périodes
             currentPeriodsData = {
                 repro: { start: 0, end: 0 },
                 naissance: { start: 0, end: 0 },
@@ -777,7 +727,8 @@ form.addEventListener('submit', async (e) => {
             }
         }
 
-        function saveAndPublishFiche() {
+        // Sauvegarde & Publication sur Supabase
+        async function saveAndPublishFiche() {
             const nomCommun = document.getElementById('field-nom-commun').value;
             const nomScientifique = document.getElementById('field-nom-scientifique').value;
 
@@ -786,12 +737,12 @@ form.addEventListener('submit', async (e) => {
                 return;
             }
 
-            const ficheData = {
+            const payload = {
                 id: currentFicheId,
-                nomCommun: nomCommun,
-                nomScientifique: nomScientifique,
+                nom_commun: nomCommun,
+                nom_scientifique: nomScientifique,
                 category: document.getElementById('field-main-category').value,
-                imgUrl: document.getElementById('field-img-url').value,
+                img_url: document.getElementById('field-img-url').value,
                 alimentation: document.getElementById('field-alimentation').value,
                 description: document.getElementById('field-description').value,
                 statuts: document.getElementById('field-statuts').value,
@@ -810,16 +761,18 @@ form.addEventListener('submit', async (e) => {
                 periods: JSON.parse(JSON.stringify(currentPeriodsData))
             };
 
-            const existingIndex = fichesData.findIndex(f => f.id === currentFicheId);
-            if (existingIndex >= 0) {
-                fichesData[existingIndex] = ficheData;
-            } else {
-                fichesData.push(ficheData);
-            }
+            try {
+                // Upsert (Insertion ou Mise à jour si l'ID existe déjà)
+                const { error } = await supabase.from('fiches').upsert(payload);
+                if (error) throw error;
 
-            renderCatalogues();
-            enableReadonlyMode();
-            alert('Fiche enregistrée et publiée avec succès dans le catalogue !');
+                await fetchFichesFromSupabase();
+                enableReadonlyMode();
+                alert('Fiche enregistrée et synchronisée sur Supabase !');
+            } catch (err) {
+                console.error("Erreur lors de la sauvegarde Supabase :", err);
+                alert("Erreur de sauvegarde dans Supabase : " + err.message);
+            }
         }
 
         function loadFiche(id) {
@@ -835,17 +788,17 @@ form.addEventListener('submit', async (e) => {
             document.getElementById('field-description').value = fiche.description || '';
             document.getElementById('field-statuts').value = fiche.statuts || '';
 
-            document.getElementById('field-h-forestier').checked = fiche.habitats.forestier;
-            document.getElementById('field-h-montagnard').checked = fiche.habitats.montagnard;
-            document.getElementById('field-h-littoral').checked = fiche.habitats.littoral;
-            document.getElementById('field-h-humide').checked = fiche.habitats.humide;
-            document.getElementById('field-h-agricole').checked = fiche.habitats.agricole;
+            document.getElementById('field-h-forestier').checked = !!fiche.habitats?.forestier;
+            document.getElementById('field-h-montagnard').checked = !!fiche.habitats?.montagnard;
+            document.getElementById('field-h-littoral').checked = !!fiche.habitats?.littoral;
+            document.getElementById('field-h-humide').checked = !!fiche.habitats?.humide;
+            document.getElementById('field-h-agricole').checked = !!fiche.habitats?.agricole;
 
-            document.getElementById('field-url-photos').value = fiche.urls.photos || '';
-            document.getElementById('field-url-sons').value = fiche.urls.sons || '';
-            document.getElementById('field-url-indices').value = fiche.urls.indices || '';
+            document.getElementById('field-url-photos').value = fiche.urls?.photos || '';
+            document.getElementById('field-url-sons').value = fiche.urls?.sons || '';
+            document.getElementById('field-url-indices').value = fiche.urls?.indices || '';
 
-            currentPeriodsData = JSON.parse(JSON.stringify(fiche.periods));
+            currentPeriodsData = JSON.parse(JSON.stringify(fiche.periods || {}));
 
             updateImagePreview();
             renderWheel();
@@ -853,15 +806,23 @@ form.addEventListener('submit', async (e) => {
             navTo('page-editor');
         }
 
-        function deleteCurrentFiche() {
-            if (confirm("Voulez-vous vraiment supprimer cette fiche ?")) {
-                fichesData = fichesData.filter(f => f.id !== currentFicheId);
-                renderCatalogues();
-                navBack();
+        // Suppression sur Supabase
+        async function deleteCurrentFiche() {
+            if (confirm("Voulez-vous vraiment supprimer cette fiche de la base de données ?")) {
+                try {
+                    const { error } = await supabase.from('fiches').delete().eq('id', currentFicheId);
+                    if (error) throw error;
+
+                    await fetchFichesFromSupabase();
+                    navBack();
+                } catch (err) {
+                    console.error("Erreur lors de la suppression :", err);
+                    alert("Erreur de suppression dans Supabase : " + err.message);
+                }
             }
         }
 
-        // Catalogue Rendering
+        // Affichage des catalogues
         function renderCatalogues() {
             const categories = ['mammiferes', 'oiseaux', 'insectes', 'squamates', 'amphibiens', 'forestier', 'montagnard', 'littoral', 'humide', 'agricole'];
             
@@ -870,14 +831,13 @@ form.addEventListener('submit', async (e) => {
                 if (!container) return;
                 container.innerHTML = '';
 
-                // Filtrer les fiches par catégorie principale ou par habitat coché
                 const matchingFiches = fichesData.filter(f => {
                     if (f.category === cat) return true;
-                    if (cat === 'forestier' && f.habitats.forestier) return true;
-                    if (cat === 'montagnard' && f.habitats.montagnard) return true;
-                    if (cat === 'littoral' && f.habitats.littoral) return true;
-                    if (cat === 'humide' && f.habitats.humide) return true;
-                    if (cat === 'agricole' && f.habitats.agricole) return true;
+                    if (cat === 'forestier' && f.habitats?.forestier) return true;
+                    if (cat === 'montagnard' && f.habitats?.montagnard) return true;
+                    if (cat === 'littoral' && f.habitats?.littoral) return true;
+                    if (cat === 'humide' && f.habitats?.humide) return true;
+                    if (cat === 'agricole' && f.habitats?.agricole) return true;
                     return false;
                 });
 
@@ -903,7 +863,7 @@ form.addEventListener('submit', async (e) => {
             });
         }
 
-        // Media Links Logic
+        // Liens multimédias
         function openMediaLink(type) {
             let url = '';
             let targetPage = '';
@@ -936,7 +896,7 @@ form.addEventListener('submit', async (e) => {
             navTo(targetPage);
         }
 
-        // Diagramme / Roue Circulaire des Périodes
+        // Diagramme / Roue Circulaire
         function togglePeriod(periodKey) {
             activePeriods[periodKey] = !activePeriods[periodKey];
             const btn = document.querySelector(`.toggle-btn[data-period="${periodKey}"]`);
@@ -967,7 +927,6 @@ form.addEventListener('submit', async (e) => {
 
             const cx = 50, cy = 50, rOuter = 48, rInner = 28;
 
-            // Fond - 12 mois
             for (let i = 0; i < 12; i++) {
                 const startAngle = (i * 30) * Math.PI / 180;
                 const endAngle = ((i + 1) * 30) * Math.PI / 180;
@@ -986,7 +945,6 @@ form.addEventListener('submit', async (e) => {
                 path.setAttribute('stroke-width', '0.5');
                 svg.appendChild(path);
 
-                // Libellés des mois
                 const midAngle = startAngle + (15 * Math.PI / 180);
                 const textR = rOuter - 6;
                 const tx = cx + textR * Math.cos(midAngle);
@@ -999,17 +957,15 @@ form.addEventListener('submit', async (e) => {
                 text.setAttribute('font-size', '3.5');
                 text.setAttribute('text-anchor', 'middle');
                 text.setAttribute('dominant-baseline', 'central');
-                // Rotation inverse pour garder les lettres droites
                 text.setAttribute('transform', `rotate(90 ${tx} ${ty})`);
                 text.textContent = MONTHS[i];
                 svg.appendChild(text);
             }
 
-            // Calques pour les périodes actives (Surbrillance / Superposition)
             Object.keys(currentPeriodsData).forEach(pKey => {
                 if (!activePeriods[pKey]) return;
 
-                const { start, end } = currentPeriodsData[pKey];
+                const { start, end } = currentPeriodsData[pKey] || {};
                 if (!start || !end) return;
 
                 let monthsToHighlight = [];
@@ -1039,12 +995,11 @@ form.addEventListener('submit', async (e) => {
                     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                     path.setAttribute('d', arcPath);
                     path.setAttribute('fill', PERIOD_COLORS[pKey]);
-                    path.setAttribute('style', 'mix-blend-mode: multiply;'); // effet de surbrillance/superposition
+                    path.setAttribute('style', 'mix-blend-mode: multiply;');
                     svg.appendChild(path);
                 });
             });
 
-            // Cercle central masque
             const innerCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             innerCircle.setAttribute('cx', cx);
             innerCircle.setAttribute('cy', cy);
@@ -1053,10 +1008,10 @@ form.addEventListener('submit', async (e) => {
             svg.appendChild(innerCircle);
         }
 
-        // Initialisation des boutons de toggle
+        // Initialisation
         document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.add('active'));
         renderWheel();
+        fetchFichesFromSupabase();
     </script>
-   
 </body>
 </html>
