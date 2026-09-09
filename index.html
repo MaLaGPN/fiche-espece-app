@@ -4,6 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fiches espèces BTS GPN</title>
+    <script src="https://mbrhsbouaktoxpzgkhyx.supabase.co/rest/v1/"></script>
+</head>
+<body>
+
+  <form id="formFiche">
+    <input type="text" id="nomCommun" placeholder="Nom commun" required>
+    <input type="text" id="nomScientifique" placeholder="Nom scientifique" required>
+    <input type="text" id="famille" placeholder="Famille" required>
+    <textarea id="description" placeholder="Description"></textarea>
+      <!-- Champ pour la photo -->
+    <input type="file" id="photoInput" accept="image/*" required>
+    
+    <button type="submit" id="btnSubmit">Enregistrer la fiche</button>
+  </form>
+
+  <div id="message"></div>
     <style>
         :root {
             --primary-color: #2e7d32;
@@ -989,5 +1005,7 @@
         document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.add('active'));
         renderWheel();
     </script>
+    <!-- Lie votre fichier JavaScript -->
+  <script src="script.js"></script>
 </body>
 </html>
