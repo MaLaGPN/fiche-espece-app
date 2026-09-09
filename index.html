@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiches espèces BTS GPN</title>
+    <style>
+        :root {
+            --primary-color: #2e7d32;
+            --primary-dark: #1b5e20;
+            --secondary-color: #81c784;
+            --bg-color: #f4f6f4;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #cccccc;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+        }
+
+        .nav-tools {
+            display: flex;
+            gap: 10px;
+        }
+
+        button, .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        button:hover, .btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        button.btn-danger {
+            background-color: #d32f2f;
+        }
+        button.btn-danger:hover {
+            background-color: #b71c1c;
+        }
+
+        button.btn-secondary {
+            background-color: #757575;
+        }
+        button.btn-secondary:hover {
+            background-color: #616161;
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .page {
+            display: none;
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .grid-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 2rem;
+        }
+
+        .menu-card {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-5px);
+            background-color: var(--primary-color);
+        }
+
+        /* Modèle de Fiche Espèce */
+        .fiche-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .fiche-header {
+            grid-column: 1 / -1;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 0.3rem;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .form-group textarea {
+            height: 80px;
+            resize: vertical;
+        }
+
+        /* Roue Calendrier Circulaire */
+        .calendar-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            grid-column: 1 / -1;
+            background: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .period-toggles {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 1rem;
+            justify-content: center;
+        }
+
+        .toggle-btn {
+            background-color: #e0e0e0;
+            color: #333;
+            border: 2px solid #ccc;
+        }
+
+        .toggle-btn.active {
+            color: white;
+        }
+
+        .toggle-btn[data-period="repro"].active { background-color: #e53935; border-color: #b71c1c; }
+        .toggle-btn[data-period="naissance"].active { background-color: #fb8c00; border-color: #e65100; }
+        .toggle-btn[data-period="dispersion"].active { background-color: #8e24aa; border-color: #4a148c; }
+        .toggle-btn[data-period="migration"].active { background-color: #1e88e5; border-color: #0d47a1; }
+
+        .wheel-container {
+            position: relative;
+            width: 320px;
+            height: 320px;
+        }
+
+        svg.wheel {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .wheel-center-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            font-weight: bold;
+            pointer-events: none;
+        }
+
+        /* Checkboxes habitats */
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 1rem 0;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        /* En-tête des actions de la fiche */
+        .fiche-actions {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 1rem;
+        }
+
+        /* Catalogue */
+        .catalogue-container {
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1rem;
+        }
+
+        .catalogue-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-top: 1rem;
+        }
+
+        .fiche-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+
+        .fiche-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .fiche-card img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            background-color: #eee;
+        }
+
+        .fiche-card-body {
+            padding: 10px;
+        }
+
+        .fiche-card-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--primary-dark);
+        }
+
+        .fiche-card-sub {
+            font-style: italic;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .media-btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        /* Mode Lecture */
+        .readonly input, .readonly textarea, .readonly select {
+            border: none;
+            background: transparent;
+            pointer-events: none;
+            padding: 0;
+        }
+
+        .readonly input[type="checkbox"] {
+            pointer-events: none;
+        }
+
+        .readonly .edit-only {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 id="app-header-title">Fiches espèces BTS GPN</h1>
+        <div class="nav-tools">
+            <button id="btn-home" onclick="navTo('page1')" class="btn-secondary">Accueil</button>
+            <button id="btn-back" onclick="navBack()" class="btn-secondary">Retour</button>
+        </div>
+    </header>
+
+    <main>
+        <!-- PAGE 1 -->
+        <div id="page1" class="page active">
+            <h2>Bienvenue sur l'application Fiches Espèces</h2>
+            <div class="grid-menu">
+                <div class="menu-card" onclick="navTo('page2')">TAXONS</div>
+                <div class="menu-card" onclick="navTo('page3')">HABITATS</div>
+            </div>
+        </div>
+
+        <!-- PAGE 2 : Taxons -->
+        <div id="page2" class="page">
+            <h2>Taxons</h2>
+            <div class="grid-menu">
+                <div class="menu-card" onclick="navTo('page4')">Mammifères</div>
+                <div class="menu-card" onclick="navTo('page5')">Oiseaux</div>
+                <div class="menu-card" onclick="navTo('page6')">Insectes</div>
+                <div class="menu-card" onclick="navTo('page7')">Squamates</div>
+                <div class="menu-card" onclick="navTo('page8')">Amphibiens</div>
+            </div>
+        </div>
+
+        <!-- PAGE 3 : Habitats -->
+        <div id="page3" class="page">
+            <h2>Habitats</h2>
+            <div class="grid-menu">
+                <div class="menu-card" onclick="navTo('page9')">Milieu forestier</div>
+                <div class="menu-card" onclick="navTo('page10')">Milieu montagnard</div>
+                <div class="menu-card" onclick="navTo('page11')">Milieu littoral</div>
+                <div class="menu-card" onclick="navTo('page12')">Milieu humide</div>
+                <div class="menu-card" onclick="navTo('page13')">Milieu ouvert/agricole</div>
+            </div>
+        </div>
+
+        <!-- PAGES 4 À 13 (Générées / Structurées dynamiquement) -->
+        <!-- Page 4 -->
+        <div id="page4" class="page" data-cat="mammiferes">
+            <h2>Fiches espèces mammifères</h2>
+            <button onclick="createNewFiche('mammiferes')" class="btn">+ Nouvelle fiche</button>
+            <div class="catalogue-container">
+                <h3>Catalogue de fiches</h3>
+                <div class="catalogue-grid" id="cat-mammiferes"></div>
+            </div>
+        </div>
+
+        <!-- Page 5 -->
+        <div id="page5" class="page" data-cat="oiseaux">
+            <h2>Fiches espèces oiseaux</h2>
+            <button onclick="createNewFiche('oiseaux')" class="btn">+ Nouvelle fiche</button>
+            <div class="catalogue-container">
+                <h3>Catalogue de fiches</h3>
+                <div class="catalogue-grid" id="cat-oiseaux"></div>
+            </div>
+        </div>
+
+        <!-- Page 6 -->
+        <div id="page6" class="page" data-cat="insectes">
+            <h2>Fiches espèces insectes</h2>
+            <button onclick="createNewFiche('insectes')" class="btn">+ Nouvelle fiche</button>
+            <div class="catalogue-container">
+                <h3>Catalogue de fiches</h3>
+                <div class="catalogue-grid" id="cat-insectes"></div>
+            </div>
+        </div>
+
+        <!-- Page 7 -->
+        <div id="page7" class="page" data-cat="squamates">
+            <h2>Fiches espèces squamates</h2>
+            <button onclick="createNewFiche('squamates')" class="btn">+ Nouvelle fiche</button>
+            <div class="catalogue-container">
+                <h3>Catalogue de fiches</h3>
+                <div class="catalogue-grid" id="cat-squamates"></div>
+            </div>
+        </div>
+
+        <!-- Page 8 -->
+        <div id="page8" class="page" data-cat="amphibiens">
+            <h2>Fiches espèces amphibiens</h2>
+            <button onclick="createNewFiche('amphibiens')" class="btn">+ Nouvelle fiche</button>
+            <div class="catalogue-container">
+                <h3>Catalogue de fiches</h3>
+                <div class="catalogue-grid" id="cat-amphibiens"></div>
+            </div>
+        </div>
+
+        <!-- Page 9 -->
+        <div id="page9" class="page" data-cat="forestier">
+            <h2>Fiches espèces milieu forestier</h2>
+            <button onclick="createNewFiche('forestier')" class="btn">+ Nouvelle fiche</button>
+            <div class="catalogue-container">
+                <h3>Catalogue de fiches</h3>
+                <div class="catalogue-grid" id="cat-forestier"></div>
+            </div>
+        </div>
+
+        <!-- Page 10 -->
+        <div id="page10" class="page" data-cat="montagnard">
+            <h2>Fiches espèces milieu montagnard</h2>
+            <button onclick="createNewFiche('montagnard')" class="btn">+ Nouvelle fiche</button>
+            <div class="catalogue-container">
+                <h3>Catalogue de fiches</h3>
+                <div class="catalogue-grid" id="cat-montagnard"></div>
+            </div>
+        </div>
+
+        <!-- Page 11 -->
+        <div id="page11" class="page" data-cat="littoral">
+            <h2>Fiches espèces milieu littoral</h2>
+            <button onclick="createNewFiche('littoral')" class="btn">+ Nouvelle fiche</button>
+            <div class="catalogue-container">
+                <h3>Catalogue de fiches</h3>
+                <div class="catalogue-grid" id="cat-littoral"></div>
+            </div>
+        </div>
+
+        <!-- Page 12 -->
+        <div id="page12" class="page" data-cat="humide">
+            <h2>Fiches espèces milieu humide</h2>
+            <button onclick="createNewFiche('humide')" class="btn">+ Nouvelle fiche</button>
+            <div class="catalogue-container">
+                <h3>Catalogue de fiches</h3>
+                <div class="catalogue-grid" id="cat-humide"></div>
+            </div>
+        </div>
+
+        <!-- Page 13 -->
+        <div id="page13" class="page" data-cat="agricole">
+            <h2>Fiches espèces milieu ouvert/agricole</h2>
+            <button onclick="createNewFiche('agricole')" class="btn">+ Nouvelle fiche</button>
+            <div class="catalogue-container">
+                <h3>Catalogue de fiches</h3>
+                <div class="catalogue-grid" id="cat-agricole"></div>
+            </div>
+        </div>
+
+        <!-- PAGE SPECIFIQUE : EDITEUR DE FICHE ESPECE -->
+        <div id="page-editor" class="page">
+            <div class="fiche-actions">
+                <button id="btn-edit-fiche" onclick="enableEditMode()">Éditer</button>
+                <button id="btn-publish-fiche" onclick="saveAndPublishFiche()">Publier</button>
+                <button id="btn-delete-fiche" onclick="deleteCurrentFiche()" class="btn-danger">Supprimer</button>
+            </div>
+
+            <form id="fiche-form" class="fiche-container">
+                <div class="fiche-header">
+                    <div class="form-group">
+                        <label>Nom commun</label>
+                        <input type="text" id="field-nom-commun" required placeholder="Ex: Martre des pins">
+                    </div>
+                    <div class="form-group">
+                        <label>Nom scientifique</label>
+                        <input type="text" id="field-nom-scientifique" required placeholder="Ex: Martes martes">
+                    </div>
+                    <div class="form-group">
+                        <label>Catégorie Taxonomique Principale</label>
+                        <select id="field-main-category">
+                            <option value="mammiferes">Mammifères</option>
+                            <option value="oiseaux">Oiseaux</option>
+                            <option value="insectes">Insectes</option>
+                            <option value="squamates">Squamates</option>
+                            <option value="amphibiens">Amphibiens</option>
+                            <option value="forestier">Milieu Forestier</option>
+                            <option value="montagnard">Milieu Montagnard</option>
+                            <option value="littoral">Milieu Littoral</option>
+                            <option value="humide">Milieu Humide</option>
+                            <option value="agricole">Milieu Ouvert/Agricole</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="form-group">
+                        <label>Image de l'espèce (URL)</label>
+                        <input type="url" id="field-img-url" placeholder="https://exemple.com/image.jpg" onchange="updateImagePreview()">
+                        <div style="margin-top: 10px;">
+                            <img id="img-preview" src="" alt="Aperçu" style="max-width: 100%; max-height: 200px; border-radius: 4px; display: none;">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Régime alimentaire / Alimentation</label>
+                        <textarea id="field-alimentation"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description (taille, envergure, poids, longévité, nombre de petits par portée)</label>
+                        <textarea id="field-description"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Statuts : réglementaire et conservation (France et Europe)</label>
+                        <textarea id="field-statuts"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Habitats occupés :</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" id="field-h-forestier"> Milieu forestier</label>
+                            <label><input type="checkbox" id="field-h-montagnard"> Milieu montagnard</label>
+                            <label><input type="checkbox" id="field-h-littoral"> Milieu littoral</label>
+                            <label><input type="checkbox" id="field-h-humide"> Milieu humide</label>
+                            <label><input type="checkbox" id="field-h-agricole"> Milieu ouvert/agricole</label>
+                        </div>
+                    </div>
+
+                    <div class="media-btn-group">
+                        <button type="button" onclick="openMediaLink('photos')" class="btn-secondary">Photos (URL)</button>
+                        <button type="button" onclick="openMediaLink('sons')" class="btn-secondary">Sons (URL)</button>
+                        <button type="button" onclick="openMediaLink('indices')" class="btn-secondary">Indices de présence (URL)</button>
+                    </div>
+                    <div class="edit-only" style="margin-top: 10px;">
+                        <input type="url" id="field-url-photos" placeholder="Lien URL Photos" style="margin-bottom: 5px;">
+                        <input type="url" id="field-url-sons" placeholder="Lien URL Sons" style="margin-bottom: 5px;">
+                        <input type="url" id="field-url-indices" placeholder="Lien URL Indices de présence">
+                    </div>
+                </div>
+
+                <!-- CALENDRIER PÉRIODES BIOLOGIQUES -->
+                <div class="calendar-section">
+                    <h3>Périodes biologiques annuelles</h3>
+                    
+                    <div class="period-toggles">
+                        <button type="button" class="toggle-btn" data-period="repro" onclick="togglePeriod('repro')">Reproduction</button>
+                        <button type="button" class="toggle-btn" data-period="naissance" onclick="togglePeriod('naissance')">Naissances</button>
+                        <button type="button" class="toggle-btn" data-period="dispersion" onclick="togglePeriod('dispersion')">Dispersion</button>
+                        <button type="button" class="toggle-btn" data-period="migration" onclick="togglePeriod('migration')">Migration</button>
+                    </div>
+
+                    <div class="edit-only" style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 1rem;">
+                        <div>
+                            <small>Mois début (1-12):</small>
+                            <input type="number" id="period-start" min="1" max="12" value="3" style="width: 60px;">
+                        </div>
+                        <div>
+                            <small>Mois fin (1-12):</small>
+                            <input type="number" id="period-end" min="1" max="12" value="6" style="width: 60px;">
+                        </div>
+                        <div>
+                            <small>Période ciblée:</small>
+                            <select id="period-type-select">
+                                <option value="repro">Reproduction</option>
+                                <option value="naissance">Naissances</option>
+                                <option value="dispersion">Dispersion</option>
+                                <option value="migration">Migration</option>
+                            </select>
+                        </div>
+                        <button type="button" onclick="savePeriodDates()" style="align-self: flex-end;">Définir dates</button>
+                    </div>
+
+                    <div class="wheel-container">
+                        <svg class="wheel" viewBox="0 0 100 100" id="wheel-svg">
+                            <!-- Les secteurs SVG seront générés par JS -->
+                        </svg>
+                        <div class="wheel-center-text">Calendrier<br>Biologique</div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- PAGE MEDIA : Photos -->
+        <div id="page14" class="page">
+            <h2>Photos de l'espèce</h2>
+            <p>Consultez la galerie photo associée à cette fiche :</p>
+            <br>
+            <a id="link-media-photos" href="#" target="_blank" class="btn">Ouvrir le lien externe des photos</a>
+        </div>
+
+        <!-- PAGE MEDIA : Sons -->
+        <div id="page15" class="page">
+            <h2>Sons de l'espèce</h2>
+            <p>Écoutez les enregistrements audio associés :</p>
+            <br>
+            <a id="link-media-sons" href="#" target="_blank" class="btn">Ouvrir le lien externe des sons</a>
+        </div>
+
+        <!-- PAGE MEDIA : Indices -->
+        <div id="page16" class="page">
+            <h2>Indices de présence</h2>
+            <p>Consultez les informations et visuels des indices de présence :</p>
+            <br>
+            <a id="link-media-indices" href="#" target="_blank" class="btn">Ouvrir le lien externe des indices</a>
+        </div>
+    </main>
+
+    <script>
+        // Data Store
+        let fichesData = [];
+        let currentFicheId = null;
+        let historyStack = ['page1'];
+        let activePeriods = {
+            repro: true,
+            naissance: true,
+            dispersion: true,
+            migration: true
+        };
+
+        // Modèle de périodes par défaut (1-12 pour les mois)
+        let currentPeriodsData = {
+            repro: { start: 3, end: 5 },
+            naissance: { start: 5, end: 6 },
+            dispersion: { start: 8, end: 10 },
+            migration: { start: 10, end: 11 }
+        };
+
+        const MONTHS = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+        const PERIOD_COLORS = {
+            repro: 'rgba(229, 57, 53, 0.6)',
+            naissance: 'rgba(251, 140, 0, 0.6)',
+            dispersion: 'rgba(142, 36, 170, 0.6)',
+            migration: 'rgba(30, 136, 229, 0.6)'
+        };
+
+        // Navigation
+        function navTo(pageId, pushHistory = true) {
+            if (pushHistory && historyStack[historyStack.length - 1] !== pageId) {
+                historyStack.push(pageId);
+            }
+
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const target = document.getElementById(pageId);
+            if (target) {
+                target.classList.add('active');
+            }
+
+            // Gérer la visibilité des boutons
+            document.getElementById('btn-home').style.display = (pageId === 'page1') ? 'none' : 'inline-block';
+            document.getElementById('btn-back').style.display = (historyStack.length <= 1) ? 'none' : 'inline-block';
+
+            window.scrollTo(0, 0);
+        }
+
+        function navBack() {
+            if (historyStack.length > 1) {
+                historyStack.pop();
+                const previousPage = historyStack[historyStack.length - 1];
+                navTo(previousPage, false);
+            }
+        }
+
+        // Modèle / Fiche Logic
+        function createNewFiche(category) {
+            currentFicheId = 'fiche_' + Date.now();
+            document.getElementById('fiche-form').reset();
+            document.getElementById('field-main-category').value = category;
+            document.getElementById('img-preview').style.display = 'none';
+
+            // Reset des périodes
+            currentPeriodsData = {
+                repro: { start: 0, end: 0 },
+                naissance: { start: 0, end: 0 },
+                dispersion: { start: 0, end: 0 },
+                migration: { start: 0, end: 0 }
+            };
+
+            enableEditMode();
+            renderWheel();
+            navTo('page-editor');
+        }
+
+        function enableEditMode() {
+            const form = document.getElementById('page-editor');
+            form.classList.remove('readonly');
+            document.getElementById('btn-publish-fiche').style.display = 'inline-block';
+            document.getElementById('btn-edit-fiche').style.display = 'none';
+        }
+
+        function enableReadonlyMode() {
+            const form = document.getElementById('page-editor');
+            form.classList.add('readonly');
+            document.getElementById('btn-publish-fiche').style.display = 'none';
+            document.getElementById('btn-edit-fiche').style.display = 'inline-block';
+        }
+
+        function updateImagePreview() {
+            const url = document.getElementById('field-img-url').value;
+            const img = document.getElementById('img-preview');
+            if (url) {
+                img.src = url;
+                img.style.display = 'block';
+            } else {
+                img.style.display = 'none';
+            }
+        }
+
+        function saveAndPublishFiche() {
+            const nomCommun = document.getElementById('field-nom-commun').value;
+            const nomScientifique = document.getElementById('field-nom-scientifique').value;
+
+            if (!nomCommun || !nomScientifique) {
+                alert('Veuillez remplir au moins le nom commun et le nom scientifique.');
+                return;
+            }
+
+            const ficheData = {
+                id: currentFicheId,
+                nomCommun: nomCommun,
+                nomScientifique: nomScientifique,
+                category: document.getElementById('field-main-category').value,
+                imgUrl: document.getElementById('field-img-url').value,
+                alimentation: document.getElementById('field-alimentation').value,
+                description: document.getElementById('field-description').value,
+                statuts: document.getElementById('field-statuts').value,
+                habitats: {
+                    forestier: document.getElementById('field-h-forestier').checked,
+                    montagnard: document.getElementById('field-h-montagnard').checked,
+                    littoral: document.getElementById('field-h-littoral').checked,
+                    humide: document.getElementById('field-h-humide').checked,
+                    agricole: document.getElementById('field-h-agricole').checked
+                },
+                urls: {
+                    photos: document.getElementById('field-url-photos').value,
+                    sons: document.getElementById('field-url-sons').value,
+                    indices: document.getElementById('field-url-indices').value
+                },
+                periods: JSON.parse(JSON.stringify(currentPeriodsData))
+            };
+
+            const existingIndex = fichesData.findIndex(f => f.id === currentFicheId);
+            if (existingIndex >= 0) {
+                fichesData[existingIndex] = ficheData;
+            } else {
+                fichesData.push(ficheData);
+            }
+
+            renderCatalogues();
+            enableReadonlyMode();
+            alert('Fiche enregistrée et publiée avec succès dans le catalogue !');
+        }
+
+        function loadFiche(id) {
+            const fiche = fichesData.find(f => f.id === id);
+            if (!fiche) return;
+
+            currentFicheId = fiche.id;
+            document.getElementById('field-nom-commun').value = fiche.nomCommun;
+            document.getElementById('field-nom-scientifique').value = fiche.nomScientifique;
+            document.getElementById('field-main-category').value = fiche.category;
+            document.getElementById('field-img-url').value = fiche.imgUrl || '';
+            document.getElementById('field-alimentation').value = fiche.alimentation || '';
+            document.getElementById('field-description').value = fiche.description || '';
+            document.getElementById('field-statuts').value = fiche.statuts || '';
+
+            document.getElementById('field-h-forestier').checked = fiche.habitats.forestier;
+            document.getElementById('field-h-montagnard').checked = fiche.habitats.montagnard;
+            document.getElementById('field-h-littoral').checked = fiche.habitats.littoral;
+            document.getElementById('field-h-humide').checked = fiche.habitats.humide;
+            document.getElementById('field-h-agricole').checked = fiche.habitats.agricole;
+
+            document.getElementById('field-url-photos').value = fiche.urls.photos || '';
+            document.getElementById('field-url-sons').value = fiche.urls.sons || '';
+            document.getElementById('field-url-indices').value = fiche.urls.indices || '';
+
+            currentPeriodsData = JSON.parse(JSON.stringify(fiche.periods));
+
+            updateImagePreview();
+            renderWheel();
+            enableReadonlyMode();
+            navTo('page-editor');
+        }
+
+        function deleteCurrentFiche() {
+            if (confirm("Voulez-vous vraiment supprimer cette fiche ?")) {
+                fichesData = fichesData.filter(f => f.id !== currentFicheId);
+                renderCatalogues();
+                navBack();
+            }
+        }
+
+        // Catalogue Rendering
+        function renderCatalogues() {
+            const categories = ['mammiferes', 'oiseaux', 'insectes', 'squamates', 'amphibiens', 'forestier', 'montagnard', 'littoral', 'humide', 'agricole'];
+            
+            categories.forEach(cat => {
+                const container = document.getElementById('cat-' + cat);
+                if (!container) return;
+                container.innerHTML = '';
+
+                // Filtrer les fiches par catégorie principale ou par habitat coché
+                const matchingFiches = fichesData.filter(f => {
+                    if (f.category === cat) return true;
+                    if (cat === 'forestier' && f.habitats.forestier) return true;
+                    if (cat === 'montagnard' && f.habitats.montagnard) return true;
+                    if (cat === 'littoral' && f.habitats.littoral) return true;
+                    if (cat === 'humide' && f.habitats.humide) return true;
+                    if (cat === 'agricole' && f.habitats.agricole) return true;
+                    return false;
+                });
+
+                matchingFiches.forEach(fiche => {
+                    const card = document.createElement('div');
+                    card.className = 'fiche-card';
+                    card.onclick = () => loadFiche(fiche.id);
+
+                    const img = document.createElement('img');
+                    img.src = fiche.imgUrl || 'https://via.placeholder.com/200x140?text=Pas+d%27image';
+
+                    const body = document.createElement('div');
+                    body.className = 'fiche-card-body';
+                    body.innerHTML = `
+                        <div class="fiche-card-title">${fiche.nomCommun}</div>
+                        <div class="fiche-card-sub">${fiche.nomScientifique}</div>
+                    `;
+
+                    card.appendChild(img);
+                    card.appendChild(body);
+                    container.appendChild(card);
+                });
+            });
+        }
+
+        // Media Links Logic
+        function openMediaLink(type) {
+            let url = '';
+            let targetPage = '';
+            let linkElement = null;
+
+            if (type === 'photos') {
+                url = document.getElementById('field-url-photos').value;
+                targetPage = 'page14';
+                linkElement = document.getElementById('link-media-photos');
+            } else if (type === 'sons') {
+                url = document.getElementById('field-url-sons').value;
+                targetPage = 'page15';
+                linkElement = document.getElementById('link-media-sons');
+            } else if (type === 'indices') {
+                url = document.getElementById('field-url-indices').value;
+                targetPage = 'page16';
+                linkElement = document.getElementById('link-media-indices');
+            }
+
+            if (linkElement) {
+                if (url) {
+                    linkElement.href = url;
+                    linkElement.style.display = 'inline-block';
+                } else {
+                    linkElement.href = '#';
+                    linkElement.style.display = 'none';
+                }
+            }
+
+            navTo(targetPage);
+        }
+
+        // Diagramme / Roue Circulaire des Périodes
+        function togglePeriod(periodKey) {
+            activePeriods[periodKey] = !activePeriods[periodKey];
+            const btn = document.querySelector(`.toggle-btn[data-period="${periodKey}"]`);
+            if (activePeriods[periodKey]) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+            renderWheel();
+        }
+
+        function savePeriodDates() {
+            const start = parseInt(document.getElementById('period-start').value);
+            const end = parseInt(document.getElementById('period-end').value);
+            const type = document.getElementById('period-type-select').value;
+
+            if (start >= 1 && start <= 12 && end >= 1 && end <= 12) {
+                currentPeriodsData[type] = { start, end };
+                renderWheel();
+            } else {
+                alert('Veuillez entrer des mois valides entre 1 et 12.');
+            }
+        }
+
+        function renderWheel() {
+            const svg = document.getElementById('wheel-svg');
+            svg.innerHTML = '';
+
+            const cx = 50, cy = 50, rOuter = 48, rInner = 28;
+
+            // Fond - 12 mois
+            for (let i = 0; i < 12; i++) {
+                const startAngle = (i * 30) * Math.PI / 180;
+                const endAngle = ((i + 1) * 30) * Math.PI / 180;
+
+                const x1 = cx + rOuter * Math.cos(startAngle);
+                const y1 = cy + rOuter * Math.sin(startAngle);
+                const x2 = cx + rOuter * Math.cos(endAngle);
+                const y2 = cy + rOuter * Math.sin(endAngle);
+
+                const pathData = `M ${cx} ${cy} L ${x1} ${y1} A ${rOuter} ${rOuter} 0 0 1 ${x2} ${y2} Z`;
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', pathData);
+                path.setAttribute('fill', i % 2 === 0 ? '#f0f0f0' : '#e4e4e4');
+                path.setAttribute('stroke', '#ffffff');
+                path.setAttribute('stroke-width', '0.5');
+                svg.appendChild(path);
+
+                // Libellés des mois
+                const midAngle = startAngle + (15 * Math.PI / 180);
+                const textR = rOuter - 6;
+                const tx = cx + textR * Math.cos(midAngle);
+                const ty = cy + textR * Math.sin(midAngle);
+
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', tx);
+                text.setAttribute('y', ty);
+                text.setAttribute('fill', '#333');
+                text.setAttribute('font-size', '3.5');
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('dominant-baseline', 'central');
+                // Rotation inverse pour garder les lettres droites
+                text.setAttribute('transform', `rotate(90 ${tx} ${ty})`);
+                text.textContent = MONTHS[i];
+                svg.appendChild(text);
+            }
+
+            // Calques pour les périodes actives (Surbrillance / Superposition)
+            Object.keys(currentPeriodsData).forEach(pKey => {
+                if (!activePeriods[pKey]) return;
+
+                const { start, end } = currentPeriodsData[pKey];
+                if (!start || !end) return;
+
+                let monthsToHighlight = [];
+                if (start <= end) {
+                    for (let m = start; m <= end; m++) monthsToHighlight.push(m - 1);
+                } else {
+                    for (let m = start; m <= 12; m++) monthsToHighlight.push(m - 1);
+                    for (let m = 1; m <= end; m++) monthsToHighlight.push(m - 1);
+                }
+
+                monthsToHighlight.forEach(mIdx => {
+                    const sAngle = (mIdx * 30) * Math.PI / 180;
+                    const eAngle = ((mIdx + 1) * 30) * Math.PI / 180;
+
+                    const x1 = cx + rOuter * Math.cos(sAngle);
+                    const y1 = cy + rOuter * Math.sin(sAngle);
+                    const x2 = cx + rOuter * Math.cos(eAngle);
+                    const y2 = cy + rOuter * Math.sin(eAngle);
+
+                    const x3 = cx + rInner * Math.cos(eAngle);
+                    const y3 = cy + rInner * Math.sin(eAngle);
+                    const x4 = cx + rInner * Math.cos(sAngle);
+                    const y4 = cy + rInner * Math.sin(sAngle);
+
+                    const arcPath = `M ${x4} ${y4} L ${x1} ${y1} A ${rOuter} ${rOuter} 0 0 1 ${x2} ${y2} L ${x3} ${y3} A ${rInner} ${rInner} 0 0 0 ${x4} ${y4} Z`;
+
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.setAttribute('d', arcPath);
+                    path.setAttribute('fill', PERIOD_COLORS[pKey]);
+                    path.setAttribute('style', 'mix-blend-mode: multiply;'); // effet de surbrillance/superposition
+                    svg.appendChild(path);
+                });
+            });
+
+            // Cercle central masque
+            const innerCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            innerCircle.setAttribute('cx', cx);
+            innerCircle.setAttribute('cy', cy);
+            innerCircle.setAttribute('r', rInner);
+            innerCircle.setAttribute('fill', '#ffffff');
+            svg.appendChild(innerCircle);
+        }
+
+        // Initialisation des boutons de toggle
+        document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.add('active'));
+        renderWheel();
+    </script>
+</body>
+</html>
